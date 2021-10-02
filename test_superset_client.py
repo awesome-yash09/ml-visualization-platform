@@ -67,6 +67,43 @@ def create_chart_histogram(dashboard_id, datasource_id, chart_name, viz_type, co
     return client.session.post(url=base_url + '/chart/', json=data).json()
 
 
+def create_chart_bar(dashboard_id, datasource_id, chart_name, viz_type, columns, group_by_columns):
+    query_context = {
+        "datasource": {
+            "id": datasource_id,
+            "type": "table"
+        },
+        "queries": [{
+            "columns": [
+                columns
+            ],
+            "metrics": [
+                "count"
+            ]
+        }
+        ]
+    }
+    data_params = {
+        "groupby": group_by_columns,
+        "viz_type": viz_type,
+        "metrics": ["count"],
+        "order_desc": True
+    }
+
+    data = {
+        "dashboards": [
+            dashboard_id
+        ],
+        "datasource_id": datasource_id,
+        "datasource_type": "table",
+        "params": json.dumps(data_params),
+        "query_context": json.dumps(query_context),
+        "slice_name": chart_name,
+        "viz_type": viz_type
+    }
+    return client.session.post(url=base_url + '/chart/', json=data).json()
+
+
 configuration = openapi_client.Configuration(
     host="http://localhost:8088/api/v1",
     username="admin",
@@ -139,4 +176,8 @@ print(response)
 
 response = create_chart_histogram(
     dashboard_created_id, dataset_id, "chart_testt2", "histogram", ["height"])
+print(response)
+
+response = create_chart_bar(dashboard_created_id, dataset_id, "chart_testt3", "dist_bar", [
+                            "confidence_score"], ["confidence_score"])
 print(response)
